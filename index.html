@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title>DOM Traversal</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.header {
+  border-bottom: 2px solid black;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+}
+
+.tree div {
+  padding: 15px;
+  margin: 10px;
+  border-radius: 1px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  user-select: none;
+  text-align: center;
+  outline: 1px solid gray;
+}
+
+.grandparent {
+  background-color: #dcd47a;
+}
+
+.parent {
+  background-color: lightblue;
+}
+
+.child {
+  background-color: pink;
+}
+
+.highlight {
+  box-shadow: 0 0 0 3px black;
+  transform: scale(1.03);
+}
+
+.fade-out {
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+.controls {
+  margin-top: 20px;
+}
+
+button {
+  margin: 5px;
+  padding: 10px;
+  cursor: pointer;
+}
+
+div:focus, button:focus {
+  outline: none;
+}
+</style>
+
+</head>
+<body>
+
+<div class="header">
+  <h2>Alvin Rosales</h2>
+  <p>Sex: Male</p>
+  <p>Address: San Jose st., San Jose (Pob.), Goa Camarines Sur</p>
+  <p>Course: BSIT 2D</p>
+  <p>School: Partido State University (Goa Campus)</p>
+  <p>Semester: 2nd Semester</p>
+  <p>Subject: PF2 – Event Driven Programming</p>
+  <p>Instructor: Mr. Arjay F. Abio</p>
+</div>
+
+<div class="tree" id="tree">
+
+  <div class="grandparent">
+    Grandparent
+
+    <div class="parent">
+      Parent 1
+      <div class="child">Child 1</div>
+      <div class="child">Child 2</div>
+    </div>
+
+    <div class="parent">
+      Parent 2
+      <div class="child">Child 3</div>
+      <div class="child">Child 4</div>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="controls">
+  <button id="downBtn">Traverse Down</button>
+  <button id="upBtn">Traverse Up</button>
+  <button id="nextBtn">Travwrse Next Sibling</button>
+  <button id="prevBtn">Traverae Previous Sibling</button>
+  <button id="addBtn">Add Child</button>
+  <button id="deleteBtn">Delete Current</button>
+</div>
+
+<script>
+let selectedNode = null;
+
+document.getElementById("tree").addEventListener("click", function(e) {
+  let target = e.target;
+
+  if (!target.classList.contains("grandparent") &&
+      !target.classList.contains("parent") &&
+      !target.classList.contains("child")) return;
+
+  if (selectedNode) selectedNode.classList.remove("highlight");
+
+  selectedNode = target;
+  selectedNode.classList.add("highlight");
+});
+
+document.getElementById("downBtn").onclick = () => {
+  if (!selectedNode) return;
+
+  let child = selectedNode.querySelector(":scope > div");
+
+  if (child) {
+    selectedNode.classList.remove("highlight");
+    selectedNode = child;
+    selectedNode.classList.add("highlight");
+  } else {
+    alert("No child available.");
+  }
+};
+
+document.getElementById("upBtn").onclick = () => {
+  if (!selectedNode) return;
+
+  let parent = selectedNode.parentElement;
+
+  if (parent && parent.id !== "tree") {
+    selectedNode.classList.remove("highlight");
+    selectedNode = parent;
+    selectedNode.classList.add("highlight");
+  } else {
+    alert("No parent available.");
+  }
+};
+
+document.getElementById("nextBtn").onclick = () => {
+  if (!selectedNode) return;
+
+  let next = selectedNode.nextElementSibling;
+
+  if (next) {
+    selectedNode.classList.remove("highlight");
+    selectedNode = next;
+    selectedNode.classList.add("highlight");
+  } else {
+    alert("No next sibling.");
+  }
+};
+
+document.getElementById("prevBtn").onclick = () => {
+  if (!selectedNode) return;
+
+  let prev = selectedNode.previousElementSibling;
+
+  if (prev) {
+    selectedNode.classList.remove("highlight");
+    selectedNode = prev;
+    selectedNode.classList.add("highlight");
+  } else {
+    alert("No previous sibling.");
+  }
+};
+
+document.getElementById("addBtn").onclick = () => {
+  if (!selectedNode) return;
+
+  let newNode;
+
+  if (selectedNode.classList.contains("grandparent")) {
+    newNode = document.createElement("div");
+    newNode.className = "parent";
+    newNode.textContent = "New Parent";
+
+    let c1 = document.createElement("div");
+    c1.className = "child";
+    c1.textContent = "New Child 1";
+
+    let c2 = document.createElement("div");
+    c2.className = "child";
+    c2.textContent = "New Child 2";
+
+    newNode.appendChild(c1);
+    newNode.appendChild(c2);
+
+    selectedNode.appendChild(newNode);
+  }
+
+  else if (selectedNode.classList.contains("parent")) {
+    newNode = document.createElement("div");
+    newNode.className = "child";
+    newNode.textContent = "New Child";
+
+    selectedNode.appendChild(newNode);
+  }
+
+  else {
+    alert("Cannot add child to a child node.");
+    return;
+  }
+
+  newNode.style.opacity = "0";
+  newNode.style.transform = "scale(0.8)";
+
+  requestAnimationFrame(() => {
+    newNode.style.transition = "all 0.25s ease";
+    newNode.style.opacity = "1";
+    newNode.style.transform = "scale(1)";
+  });
+};
+
+document.getElementById("deleteBtn").onclick = () => {
+  if (!selectedNode) return;
+
+  if (selectedNode.classList.contains("grandparent")) {
+    alert("Cannot delete grandparent.");
+    return;
+  }
+
+  selectedNode.style.transition = "all 0.2s ease";
+  selectedNode.style.opacity = "0";
+  selectedNode.style.transform = "scale(0.8)";
+
+  setTimeout(() => {
+    selectedNode.remove();
+    selectedNode = null;
+  }, 200);
+};
+</script>
+
+</body>
+</html>
